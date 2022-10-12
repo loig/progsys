@@ -1,0 +1,199 @@
+\documentclass[a4paper]{article}
+
+\usepackage{fullpage}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage[hyperfootnotes=false]{hyperref}
+
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+
+%\usepackage[fontsize=18pt]{scrextend}
+%\usepackage{setspace}
+%\onehalfspacing
+
+%boxes
+\newcounter{saveFootnote}
+\usepackage{fancybox}
+\newcommand{\important}[1]{\setcounter{saveFootnote}{\value{footnote}}\vspace{0.3cm}\doublebox{\begin{minipage}{14.5cm}#1\end{minipage}}\vspace{0.3cm}}
+\newcommand{\remarque}[1]{\setcounter{saveFootnote}{\value{footnote}}\vspace{0.3cm}\fbox{\begin{minipage}{14.5cm}#1\end{minipage}}\vspace{0.3cm}}
+\newcommand{\exercice}[1]{\setcounter{saveFootnote}{\value{footnote}}\vspace{0.3cm}\shadowbox{\begin{minipage}{14.5cm}#1\end{minipage}}\vspace{0.3cm}}
+
+%code
+\usepackage{listings}
+\usepackage{color}
+\usepackage{newfloat}
+\usepackage{caption}
+\DeclareFloatingEnvironment[fileext=frm,placement={htbp},name=Programme]{figprog}
+\captionsetup[figprog]{labelfont=bf}
+%% Golang definition for listings
+%% http://github.io/julienc91/lstlistings-golang
+\lstdefinelanguage{Golang}{
+  morekeywords=[1]{package,import,func,type,struct,return,defer,panic,recover,select,var,const,iota,},
+   morekeywords=[2]{string,uint,uint8,uint16,uint32,uint64,int,int8,int16,int32,int64,bool,float32,float64,complex64,complex128,byte,rune,uintptr, error,interface},
+   morekeywords=[3]{map,slice,make,new,nil,len,cap,copy,close,true,false,delete,append,real,imag,complex,chan,},
+   morekeywords=[4]{for,break,continue,range,go,goto,switch,case,fallthrough,if,
+     else,default,},
+   morekeywords=[5]{Println,Printf,Error,Print,Fatal,ReadFile,Open,NewScanner,Scan,Text,Err,Create,Close},
+   sensitive=true,
+   morecomment=[l]{//},
+   morecomment=[s]{/*}{*/},
+   morestring=[b]',
+   morestring=[b]",
+   morestring=[s]{`}{`}
+   }
+\lstset{
+    extendedchars=\true,
+    inputencoding=utf8,
+    literate=%
+            {é}{{\'{e}}}1
+            {è}{{\`{e}}}1
+            {ê}{{\^{e}}}1
+            {ë}{{\¨{e}}}1
+            {û}{{\^{u}}}1
+            {ù}{{\`{u}}}1
+            {â}{{\^{a}}}1
+            {à}{{\`{a}}}1
+            {î}{{\^{i}}}1
+            {ô}{{\^{o}}}1
+            {ç}{{\c{c}}}1
+            {Ç}{{\c{C}}}1
+            {É}{{\'{E}}}1
+            {Ê}{{\^{E}}}1
+            {À}{{\`{A}}}1
+            {Â}{{\^{A}}}1
+            {Î}{{\^{I}}}1,
+    frame=none,
+    xleftmargin=1cm,
+    basicstyle=\footnotesize,
+    keywordstyle=\bf\color{blue},
+    numbers=none,
+    numbersep=5pt,
+    showstringspaces=false,
+    stringstyle=\color{red},
+    tabsize=4,
+    language=Golang % this is it !
+}
+\newcommand{\sourcecode}[3]{\begin{figprog}\begin{center}\begin{minipage}{10cm}\par\noindent\rule{\textwidth}{0.4pt}\lstinputlisting{src/#1}\par\noindent\rule{\textwidth}{0.4pt}\end{minipage}\end{center}\caption{#1}\label{#3}\end{figprog}}
+\newcommand{\bigsourcecode}[3]{\begin{figprog}\begin{center}\begin{minipage}{16cm}\par\noindent\rule{\textwidth}{0.4pt}\lstinputlisting{src/#1}\par\noindent\rule{\textwidth}{0.4pt}\end{minipage}\end{center}\caption{#1}\label{#3}\end{figprog}}
+
+% macros générales
+\newcommand{\file}[1]{\textsf{#1}}
+\newcommand{\madoc}{\textsc{Madoc}}
+\newcommand{\term}[1]{\textsf{#1}}
+\newcommand{\inlinecode}[1]{\textsf{#1}}
+\newcommand{\goout}[1]{\textsf{#1}} % retours de go, erreurs, etc
+
+\title{Les bases du langage Go\\ Partie 6~: communication réseau}
+\author{Programmation système}
+\date{BUT informatique, deuxième année}
+
+\begin{document}
+
+\maketitle{}
+
+Comme pour le cours d'initiation au développement, le langage Go sera utilisé pour le cours de programmation système.
+Ce TP a pour but de compléter les bases du langage Go étudiées l'an dernier.
+On part du principe que les bases du langage Go (5 parties) vues en initiation au développement sont maîtrisées.
+
+\important{Dans tout ce TP un texte avec cet encadrement est un texte contenant une information importante, il faut donc le lire avec attention et veiller à en tenir compte.}
+
+\remarque{Un texte avec cet encadrement est une remarque.}
+
+\exercice{Un texte avec cet encadrement est un travail que vous avez à faire.}
+
+
+\remarque{Si vous souhaitez avoir un autre point de vue sur le contenu de ce TP, vous pouvez consulter, par exemple, le site \emph{Go by Example}\footnotemark{}.}
+\stepcounter{saveFootnote}
+\footnotetext[\value{saveFootnote}]{\url{https://tour.golang.org/}}
+\stepcounter{saveFootnote}
+\footnotetext[\value{saveFootnote}]{\url{https://gobyexample.com/}}
+
+\newpage{}
+
+\section{Sockets Unix}
+
+Sur un ordinateur Linux on peut communiquer entre processus en utilisant un mécanisme appelé \emph{sockets}.
+L'idée générale est la suivante pour la communication entre deux processus : un fichier particulier est créé et, quand un des processus écrit dans ce fichier, l'autre a la possibilité de lire ce qui vient d'être écrit.
+
+En Go, le paquet \inlinecode{net} permet de créer des sockets et d’interagir avec.
+Pour mettre en place la communication on utilise une approche client/serveur, qu'on peut décomposer en trois étapes~:
+\begin{enumerate}
+\item Le serveur se met en écoute (processus 1)
+\item Le client demande à se connecter (processus 2)
+\item Le serveur accepte la connexion (processus 1)
+\end{enumerate}
+À l'issu de ces trois étapes, une voie de communication est ouverte entre les deux processus, permettant à chacun d'écrire et de lire des messages.
+
+\important{Une fois la communication établie, les rôles de client et de serveur n'ont plus lieu d'être : cette communication est symétrique.}
+
+\subsection{Listen~: le serveur se met en écoute}
+
+La mise en écoute du serveur peut se faire par la fonction \inlinecode{net.Listen} (du paquet \inlinecode{net}).
+Le programme~\ref{code:listen} donne un exemple de son utilisation~: il crée un serveur se mettant en écoute avec le protocole \inlinecode{unix} à l'adresse \file{test.sock}.
+On obtient un objet (au sens strict du terme, il n'y a pas d'objets en Go, mais cela y ressemble beaucoup) de type \inlinecode{net.Listener} qui permettra ensuite d'accepter une connexion d'un client.
+Après ça, on utilise \inlinecode{defer} pour garantir la fermeture de \inlinecode{listener} a la fin du programme.
+Enfin, un \inlinecode{time.Sleep} effectue une attente de 10 secondes qui sert à simuler les traitements à faire par le serveur.
+
+\sourcecode{half-server.go}{Écoute écoute}{code:listen}
+
+\exercice{Récupérez le fichier \file{half-server.go} sur \madoc{}, compilez-le et exécutez-le. Pendant que le serveur tourne, regardez le contenu du dossier où vous l'avez lancé. Une fois que le serveur a terminé de tourner, regardez à nouveau le contenu de ce dossier. Qu'observez-vous ?}
+
+\exercice{Faites tourner deux serveurs en même temps. Que remarquez-vous ? Qu'en déduisez-vous sur les sockets ?}
+
+\subsection{Accept~: le serveur accepte la connexion}
+
+Une fois qu'un client aura demandé à se connecter à notre serveur, il faudra que ce dernier accepte la connexion pour pouvoir mettre en place la communication.
+Le programme~\ref{code:accept} est une évolution du programme~\ref{code:listen} qui ajoute l'acceptation d'une demande de connexion avec \inlinecode{listener.Accept()}.
+Ceci crée un objet de type \inlinecode{net.Conn} qui permettra d'interagir avec le client.
+Il ne faut pas oublier de fermer la connexion en fin de programme.
+
+\sourcecode{server.go}{Accepté}{code:accept}
+
+\exercice{Récupérez le fichier \file{server.go} sur \madoc{}, compilez-le et exécutez-le. Attendez une quinzaine de secondes. Que remarquez-vous ? Qu'en déduisez-vous sur la méthode \inlinecode{Accept} ? Arrêtez le serveur (avec Ctrl+c par exemple).}
+
+\exercice{Relancez un serveur. Que remarquez-vous ? Supprimez à la main le fichier \file{test.sock}. Lancez encore un serveur. Qu'en déduisez-vous ?}
+
+\subsection{Dial~: le client demande à se connecter}
+
+Un autre processus (qu'on appelle en général client) peut demander à se connecter au premier processus (le serveur).
+Pour cela, on utilise la fonction \inlinecode{net.Dial} en précisant les mêmes informations que dans la fonction \inlinecode{net.Listen} du serveur.
+Le programme~\ref{code:dial} donne un exemple de cela.
+
+\sourcecode{client.go}{Appel}{code:dial}
+
+\exercice{Récupérez le fichier \file{client.go} sur \madoc{}. Compilez-le puis essayez de l'exécuter quand le serveur tourne et quand il ne tourne pas. Qu'observez-vous ?}
+
+\subsection{Communiquer}
+
+Une fois la communication établie, il est possible de communiquer entre les deux processus au moyen de leurs connexions (\inlinecode{net.Conn}) respectives.
+Pour cela on dispose de méthodes \inlinecode{Read} (pour lire) et \inlinecode{Write} (pour écrire).
+
+\exercice{Modifiez \file{server.go} et \file{client.go} de façon à pouvoir échanger un message entre eux. Il faudra donc que l'un lise et l'autre écrive. Placez judicieusement des affichages dans votre code pour constater ce qui se passe. Pour en savoir plus sur \inlinecode{Read} et \inlinecode{Write} n'hésitez pas à aller voir la documentation de paquet \inlinecode{net}\footnotemark{}. On remarque notamment que ces fonctions retournent des erreurs, qu'il faudra donc tester systématiquement.}
+\stepcounter{saveFootnote}
+\footnotetext[\value{saveFootnote}]{\url{https://golang.google.cn/pkg/net/}}
+
+\remarque{On peut «transformer» une variable \inlinecode{msg} de type \inlinecode{[]byte} en variable de type \inlinecode{string} en écrivant simplement \inlinecode{string(msg)}.}
+
+L'utilisation de ces fonctions de lecture et d'écriture n'est pas des plus simples car elles ne manipulent que des flux d'octets~: il faut traiter soit même le découpage de ces flux en messages en fonction du protocole de communication que l'on souhaite mettre en place.
+
+Pour se simplifier la vie on peut interagir avec notre connexion en utilisant des méthodes de plus haut niveau qui se basent sur \inlinecode{Read} et \inlinecode{Write} mais sont plus intuitives à utiliser. On peut par exemple utiliser le paquet \inlinecode{bufio}, exactement comme nous l'avions fait dans la partie 3 de cet apprentissage du Go pour écrire et lire dans des fichiers.
+
+\exercice{Modifiez à nouveau votre serveur et votre client pour utiliser les méthodes de \inlinecode{bufio} pour échanger le message entre vos deux processus.}
+
+\section{À travers le réseau}
+
+Pour communiquer entre machines situées sur un même réseau on peut procéder de la même manière que pour communiquer entre processus sur une machine unique.
+Il suffit de changer le protocole de communication (actuellement \emph{unix}) et l'adresse à laquelle on contacte le serveur (actuellement \file{test.sock}).
+
+Les programmes~\ref{code:tcpserv} et~\ref{code:tcpcli} sont des adaptation des programmes précédents pour établir une connexion TCP à l'adresse \file{localhost} (donc toujours sur une seule machine) et sur le port 8080.
+
+\sourcecode{server-tcp.go}{Serveur TCP}{code:tcpserv}
+
+\sourcecode{client-tcp.go}{Client TCP}{code:tcpcli}
+
+\exercice{Récupérez sur \madoc{} les fichiers \file{server-tcp.go} et \file{client-tcp.go}, compilez-les, exécutez-les. Constatez que tout fonctionne bien, éventuellement en les modifiant pour échanger quelques messages.}
+
+\exercice{Avec votre voisin ou votre voisine, mettez en place une communication entre vos machines~: le serveur sera sur une machine et le client sur l'autre. Testez. Échangez quelques messages.}
+
+\end{document}
