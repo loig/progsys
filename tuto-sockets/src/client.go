@@ -14,6 +14,6 @@ func main() {
 	}
 	defer conn.Close()
 
-	log.Println("Je suis connecté au serveur")
+	log.Println("Je suis connecté")
 
 }
