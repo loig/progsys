@@ -378,12 +378,13 @@ La gestion assez rigide des processus implique fortement le système d'exploitat
 \frametitle{Threads (processus légers)}
 
 \begin{itemize}
-\item Fils d'exécution concurrents au sein d'un processus
+  \item Fils d'exécution séquentiels
+\item Concurrents au sein d'un processus
 \item Ordonnancés par le noyau du système d'exploitation
 \item Mémoire partagée (entre threads d'un même processus)
 \item Pile et registres privés
 \item Changement de contexte peu coûteux
-\item Pas de notion d'enfants/parents~: \emph{pool} de threads
+\item Pas de notion d'enfants/parents
 \end{itemize}
 
 }
@@ -399,6 +400,94 @@ La gestion assez rigide des processus implique fortement le système d'exploitat
 \centering
 \Huge
 Goroutines
+}
+
+\frame{
+\frametitle{Goroutine}
+
+\begin{itemize}
+\item Fil d'exécution séquentiel
+\item Plusieurs par thread (potentiellement)
+\item Très léger ($10^6$ par processus)
+\item Mémoire partagée (entre goroutines d'un programme)
+\item API minimale (seule chose possible = démarrer une goroutine)
+\item Ordonnancement par le scheduler du runtime Go
+\end{itemize}
+
+\vfill
+
+\pause
+
+\begin{block}{Par défaut}
+main, ramasse miette
+\end{block}
+
+}
+
+\frame{
+\frametitle{Utiliser les goroutines}
+
+\begin{block}{On utilise le mot clé go pour démarrer une goroutine}
+ping-pong.go
+\end{block}
+
+\begin{block}{Main est plus importante que les autres}
+main.go
+\end{block}
+
+\begin{block}{L'ordre d'exécution n'est pas controllable}
+schedule.go
+\end{block}
+
+\begin{block}{La mémoire est partagée}
+global.go\\
+local.go
+\end{block}
+
+\begin{block}{On peut lancer beaucoup de goroutines en même temps}
+many.go
+\end{block}
+
+}
+
+\frame{
+\frametitle{Ordonnancement, vu de loin}
+
+\begin{block}{M:P:N Threading (en général, $N>M>P$)}
+  \begin{itemize}
+\item M threads,
+\item P processeurs,
+\item N goroutines.
+\end{itemize}
+Pour s'exécuter \alert{une goroutine est associée à un thread}, qui est lui-même \alert{associé à un processeur}.
+\end{block}
+
+\begin{block}{Choix des goroutines à exécuter}
+\begin{itemize}
+\item Une file d'attente par processeur
+\item Points d'intérêt permettant un changement (appels de fonctions notamment)
+\item Préemption pour assurer l'équité entre goroutines
+\end{itemize}
+\end{block}
+
+}
+
+\frame{
+\frametitle{Pourquoi $M > P$ ?}
+
+\begin{block}{Supposons $M = P$}
+\begin{enumerate}
+  \item Lors d'un appel système un couple (thread, goroutine) peut être bloqué dans le noyau
+  \item Le runtime Go ne peut pas savoir si c'est bloqué ou simplement long (le noyau est invisible aux utilisateurs)
+  \item Si tous les threads sont bloqués ainsi le programme est, au moins temporairement, bloqué, le temps processeur est gaspillé
+  \item Pire, si les goroutines concernées sont en attente d'une goroutine qui ne s'exécute pas actuellement (car il n'y a pas de thread disponible pour elle) le programme est définitivement bloqué (deadlock)
+\end{enumerate}
+\end{block}
+
+\begin{block}{Solution}
+Le runtime Go est autorisé à créer de nouveaux threads lors des appels système
+\end{block}
+
 }
 
 \end{document}
