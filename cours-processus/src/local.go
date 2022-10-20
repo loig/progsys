@@ -20,7 +20,7 @@ func main() {
 
 	for {
 		fmt.Println(x)
-		time.Sleep(time.Millisecond)
+		time.Sleep(250 * time.Millisecond)
 	}
 
 }

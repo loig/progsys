@@ -1,0 +1,182 @@
+\documentclass[a4paper]{article}
+
+\usepackage{fullpage}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage[hyperfootnotes=false]{hyperref}
+
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+
+%\usepackage[fontsize=18pt]{scrextend}
+%\usepackage{setspace}
+%\onehalfspacing
+
+%boxes
+\newcounter{saveFootnote}
+\usepackage{fancybox}
+\newcommand{\important}[1]{\setcounter{saveFootnote}{\value{footnote}}\vspace{0.3cm}\doublebox{\begin{minipage}{14.5cm}#1\end{minipage}}\vspace{0.3cm}}
+\newcommand{\remarque}[1]{\setcounter{saveFootnote}{\value{footnote}}\vspace{0.3cm}\fbox{\begin{minipage}{14.5cm}#1\end{minipage}}\vspace{0.3cm}}
+\newcommand{\exercice}[1]{\setcounter{saveFootnote}{\value{footnote}}\vspace{0.3cm}\shadowbox{\begin{minipage}{14.5cm}#1\end{minipage}}\vspace{0.3cm}}
+
+%code
+\usepackage{listings}
+\usepackage{color}
+\usepackage{newfloat}
+\usepackage{caption}
+\DeclareFloatingEnvironment[fileext=frm,placement={htbp},name=Programme]{figprog}
+\captionsetup[figprog]{labelfont=bf}
+%% Golang definition for listings
+%% http://github.io/julienc91/lstlistings-golang
+\lstdefinelanguage{Golang}{
+  morekeywords=[1]{package,import,func,type,struct,return,defer,panic,recover,select,var,const,iota,},
+   morekeywords=[2]{string,uint,uint8,uint16,uint32,uint64,int,int8,int16,int32,int64,bool,float32,float64,complex64,complex128,byte,rune,uintptr, error,interface},
+   morekeywords=[3]{map,slice,make,new,nil,len,cap,copy,close,true,false,delete,append,real,imag,complex,chan,},
+   morekeywords=[4]{for,break,continue,range,go,goto,switch,case,fallthrough,if,
+     else,default,},
+   morekeywords=[5]{Println,Printf,Error,Print,Fatal,ReadFile,Open,NewScanner,Scan,Text,Err,Create,Close},
+   sensitive=true,
+   morecomment=[l]{//},
+   morecomment=[s]{/*}{*/},
+   morestring=[b]',
+   morestring=[b]",
+   morestring=[s]{`}{`}
+   }
+\lstset{
+    extendedchars=\true,
+    inputencoding=utf8,
+    literate=%
+            {é}{{\'{e}}}1
+            {è}{{\`{e}}}1
+            {ê}{{\^{e}}}1
+            {ë}{{\¨{e}}}1
+            {û}{{\^{u}}}1
+            {ù}{{\`{u}}}1
+            {â}{{\^{a}}}1
+            {à}{{\`{a}}}1
+            {î}{{\^{i}}}1
+            {ô}{{\^{o}}}1
+            {ç}{{\c{c}}}1
+            {Ç}{{\c{C}}}1
+            {É}{{\'{E}}}1
+            {Ê}{{\^{E}}}1
+            {À}{{\`{A}}}1
+            {Â}{{\^{A}}}1
+            {Î}{{\^{I}}}1,
+    frame=none,
+    xleftmargin=1cm,
+    basicstyle=\footnotesize,
+    keywordstyle=\bf\color{blue},
+    numbers=none,
+    numbersep=5pt,
+    showstringspaces=false,
+    stringstyle=\color{red},
+    tabsize=4,
+    language=Golang % this is it !
+}
+\newcommand{\sourcecode}[3]{\begin{figprog}\begin{center}\begin{minipage}{10cm}\par\noindent\rule{\textwidth}{0.4pt}\lstinputlisting{src/#1}\par\noindent\rule{\textwidth}{0.4pt}\end{minipage}\end{center}\caption{#1}\label{#3}\end{figprog}}
+\newcommand{\bigsourcecode}[3]{\begin{figprog}\begin{center}\begin{minipage}{16cm}\par\noindent\rule{\textwidth}{0.4pt}\lstinputlisting{src/#1}\par\noindent\rule{\textwidth}{0.4pt}\end{minipage}\end{center}\caption{#1}\label{#3}\end{figprog}}
+
+% macros générales
+\newcommand{\file}[1]{\textsf{#1}}
+\newcommand{\madoc}{\textsc{Madoc}}
+\newcommand{\term}[1]{\textsf{#1}}
+\newcommand{\inlinecode}[1]{\textsf{#1}}
+\newcommand{\goout}[1]{\textsf{#1}} % retours de go, erreurs, etc
+
+\title{Les bases du langage Go\\ Partie 7~: goroutines et canaux}
+\author{Programmation système}
+\date{BUT informatique, deuxième année}
+
+\begin{document}
+
+\maketitle{}
+
+Comme pour le cours d'initiation au développement, le langage Go sera utilisé pour le cours de programmation système.
+Ce TP a pour but de compléter les bases du langage Go étudiées l'an dernier.
+On part du principe que les bases du langage Go (5 parties) vues en initiation au développement sont maîtrisées.
+
+\important{Dans tout ce TP un texte avec cet encadrement est un texte contenant une information importante, il faut donc le lire avec attention et veiller à en tenir compte.}
+
+\remarque{Un texte avec cet encadrement est une remarque.}
+
+\exercice{Un texte avec cet encadrement est un travail que vous avez à faire.}
+
+
+\remarque{Si vous souhaitez avoir un autre point de vue sur le contenu de ce TP, vous pouvez consulter, par exemple, le site \emph{Go by Example}\footnotemark{}.}
+\stepcounter{saveFootnote}
+\footnotetext[\value{saveFootnote}]{\url{https://gobyexample.com/}}
+
+\newpage{}
+
+\section{Goroutines}
+
+En Go, une goroutine est un moyen d'exécuter une fonction de manière concurrente par rapport au reste du programme.
+On dispose d'un seul moyen de contrôle sur les goroutines~: le mot clé \inlinecode{go} qui permet de les créer.
+
+Le programme~\ref{code:goroutines} montre la création d'une goroutine à partir de l'appel de fonction \inlinecode{iter(1)}.
+
+\sourcecode{goroutines.go}{Démarrer des goroutines}{code:goroutines}
+
+\exercice{Récupérez le fichier \file{goroutines.go} sur \madoc{} et testez le programme plusieurs fois. Obtenez-vous toujours le même résultat ? Pourquoi ? Est-ce que chacune des deux goroutines affiche bien 100 messages à chaque fois ? Pourquoi ? Que se passe-t-il si on inverse les deux lignes du \inlinecode{main} ? Expliquez.}
+
+\exercice{Modifiez le fichier \file{goroutines.go} pour lancer 100 goroutines (numérotées de 1 à 100) au lieu de 2.}
+
+
+\section{Canaux}
+% créer un canal
+% écrire dans un canal
+% lire dans un canal
+% canaux unidirectionnels ?
+
+En Go, la mémoire est partagée entre goroutines, on peut donc, comme dans le programme~\ref{code:race} avoir plusieurs goroutines qui utilisent une même variable pour communiquer.
+
+\sourcecode{partage.go}{Mémoire partagée}{code:race}
+
+\exercice{Récupérez le fichier \file{partage.go} sur \madoc{} et testez-le.}
+
+Utiliser la mémoire partagée pour communiquer entre goroutines n'est pas recommandé~: on peut avoir des conflits entre les accès aux variables partagées par les différentes goroutines.
+Le mécanisme recommandé en Go pour la communication entre goroutines s'appelle les canaux.
+
+Le programme~\ref{code:chan} montre comment créer un canal contenant des entiers et de taille 3 (c'est-à-dire pouvant contenir 3 valeurs en même temps).
+On écrit ensuite des valeurs dans le canal, puis on en lit (et on les affiche).
+
+\sourcecode{chan.go}{Utilisation des canaux}{code:chan}
+
+\exercice{Récupérez le fichier \file{chan.go} sur \madoc{} et testez-le. Dans quel ordre sont rangés les messages dans un canal ?}
+
+\remarque{On parle de deadlock lorsque chaque goroutine d'un programme est en attente sur une opération nécessitant l'intervention d'une autre goroutine pour être débloquée.}
+
+\exercice{Modifiez le programme \file{chan.go} pour ajouter une écriture supplémentaire dans \inlinecode{c} avant les lectures. Testez votre programme. Qu'en déduisez-vous ?}
+
+\exercice{Modifiez le programme \file{chan.go} pour ajouter deux lectures supplémentaires dans \inlinecode{c} après les écritures. Testez votre programme. Qu'en déduisez-vous ?}
+
+On peut bien sûr créer des canaux contenant d'autres types de valeurs que des entiers : booléens, chaînes de caractères, tableaux, ou même canaux.
+
+\exercice{Réécrivez le programme~\ref{code:race} en remplaçant l'utilisation de variables partagées par l'utilisation de canaux.}
+
+On peut aussi créer des canaux de taille 0 en ne précisant pas de taille dans \inlinecode{make}, comme dans le programme~\ref{code:zero}.
+Une écriture dans un tel canal n'est alors possible que si une lecture à lieu au même moment (et réciproquement).
+
+\sourcecode{zero.go}{Canal de taille 0}{code:zero}
+
+\exercice{Récupérez le ficher \file{zero.go} sur \madoc{} et testez-le. Modifiez-le pour donner une grande taille au canal \inlinecode{c} lors de sa création. Testez à nouveau. Quelle différence observez-vous ? Expliquez.}
+
+\section{La structure de contrôle select}
+% select
+% canal du temps écoulé (time)
+% exo : boucle ou chaque itération dure au max x secondes
+% exo : boucle ou somme des temps des itérations ne dépasse pas x secondes
+
+Les canaux viennent avec une structure de contrôle permettant de faire une attente conditionnelle~: \inlinecode{select}.
+Un exemple d'utilisation de cette structure de contrôle est donné dans le programme~\ref{code:select}.
+
+\sourcecode{select.go}{La structure de contrôle select}{code:select}
+
+\exercice{Expliquez en détails le fonctionnement du programme~\ref{code:select}.}
+
+\exercice{Récupérez le fichier \file{select.go} sur \madoc{} et testez-le plusieurs fois.}
+
+\exercice{Renseignez-vous sur la fonction \inlincode{After} du paquet \inlinecode{time}. Modifiez \file{select.go} en ajoutant une condition dans le \inlinecode{select} pour limiter l'attente à 500ms.}
+
+\end{document}

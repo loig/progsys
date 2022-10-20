@@ -5,11 +5,11 @@ import (
 	"time"
 )
 
-const maxroutine = 10000
+const maxroutine = 1000000
 
 func echoID(ID int) {
 	for {
-		fmt.Println("Je suis la gouroutine numéro", ID)
+		fmt.Println(ID)
 		time.Sleep(time.Millisecond)
 	}
 }
