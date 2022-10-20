@@ -107,6 +107,11 @@ func (g *Game) DrawResult(screen *ebiten.Image) {
 // function to draw what is needed in the game window
 func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.RGBA{141, 200, 235, 255})
+
+	if g.getTPS {
+		ebitenutil.DebugPrint(screen, fmt.Sprint(ebiten.CurrentTPS()))
+	}
+
 	switch g.state {
 	case StateWelcomeScreen:
 		g.DrawWelcomeScreen(screen)

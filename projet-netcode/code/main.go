@@ -6,6 +6,7 @@
 package main
 
 import (
+	"flag"
 	_ "image/png"
 	"log"
 
@@ -19,10 +20,15 @@ const (
 
 func main() {
 
+	var getTPS bool
+	flag.BoolVar(&getTPS, "tps", false, "Afficher le nombre d'appel à Update par seconde")
+	flag.Parse()
+
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("BUT2 année 2022-2023, R3.05 Programmation système")
 
 	g := InitGame()
+	g.getTPS = getTPS
 
 	err := ebiten.RunGame(&g)
 	log.Print(err)

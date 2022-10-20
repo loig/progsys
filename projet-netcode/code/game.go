@@ -24,6 +24,7 @@ type Game struct {
 	f           Field         // The running field
 	launchStep  int           // Current step in StateLaunchRun state
 	resultStep  int           // Current step in StateResult state
+	getTPS      bool          // Help for debug
 }
 
 // These constants define the five possible states of the game
