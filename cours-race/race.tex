@@ -1,0 +1,181 @@
+\documentclass{beamer}
+
+\setbeamertemplate{footline}[frame number]
+
+\usepackage{tikz}
+\usepackage{centernot}
+\usepackage[T1]{fontenc}
+
+
+\title{Programmation système}
+\author{Accès concurrents, blocages}
+\date{loig.jezequel@univ-nantes.fr}
+
+\begin{document}
+
+
+\frame{
+\maketitle
+}
+
+\frame{
+\frametitle{Difficultés de la programmation concurrente}
+
+\centering
+On commence par un exemple : race.go
+
+}
+
+\frame{
+\frametitle{Accès concurrents à une ressource}
+
+\begin{block}{Ce qu'il s'est passé}
+  \begin{itemize}
+    \item Toutes les goroutines modifiaient les valeurs des mêmes variables en même temps (de manière concurrente)
+    \item On ne peut pas faire d'hypothèse sur l'ordre d'exécution des instructions dans un contexte de concurrence
+    \item L'échange de valeurs de variables n'est pas \alert{atomique}
+  \end{itemize}
+\end{block}
+
+\begin{exampleblock}{Exercice}
+  Indiquer comment doit sans doute être réalisée l'échange des valeurs de deux variables au niveau du code compilé.
+  En déduire les différentes sorties possibles dans le cas où on a deux goroutines dont chacune échange les valeurs des deux mêmes variables (on pourra représenter pour cela les entrelacements possibles des opérations réalisées par ces goroutines).
+\end{exampleblock}
+
+}
+
+\frame{
+\frametitle{Accès concurrents à une ressource (suite)}
+
+\begin{alertblock}{Race condition}
+On parle d'accès concurrents (ou de race condition) à une ressource lorsque plusieurs accès à une variable (dont au moins une écriture) ont lieu de manière concurrente.
+\end{alertblock}
+
+\begin{block}{Placer des temps d'attente ne résout pas les problèmes}
+  race2.go
+\end{block}
+
+\begin{exampleblock}{Exercice}
+Proposer des idées pour éviter le problème d'accès concurrents à une ressource dans l'exemple précédent (race.go)
+\end{exampleblock}
+
+}
+
+\frame{
+\frametitle{Exclusion mutuelle}
+
+\begin{block}{Section critique}
+On appelle \alert{section critique} l'endroit du code où on accède à une ressource partagée
+\end{block}
+
+\begin{alertblock}{Exclusion mutuelle}
+Assurer l'exclusion mutuelle c'est assurer qu'un seul fil d'exécution à la fois accède à une section critique. Dans ce cas, il n'y a pas d'accès concurrents à la ressource partagée.
+\end{alertblock}
+
+\begin{block}{Une première solution}
+  race3.go
+\end{block}
+
+}
+
+\frame{
+\frametitle{Exclusion mutuelle (suite)}
+
+\begin{exampleblock}{Exercice}
+Pourquoi la première solution proposée pour réserver l'accès à la section critique (fichier race3.go) n'est-elle pas satisfaisante ?
+\end{exampleblock}
+
+\pause
+
+
+\begin{alertblock}{Opérations atomiques}
+Si on est capable de tester une variable et de changer sa valeur en une seule opération (qu'on appelle atomique) alors on peut résoudre le problème de l'exclusion mutuelle.
+\end{alertblock}
+
+\begin{block}{Implantation}
+  race4.go
+\end{block}
+
+}
+
+\frame{
+\frametitle{Famine}
+
+\begin{exampleblock}{Exercice}
+Si chaque fil d'exécution veut accéder plusieurs fois à la section critique, voyez-vous un problème qui peut arriver avec l'implantation qu'on vient de voir ? (fichier race4.go)
+\end{exampleblock}
+
+\pause
+
+\begin{alertblock}{Famine (starvation)}
+Un fil d'exécution peut demander l'accès à une ressource (section critique) et ne jamais l'obtenir (il suffit qu'il y ait toujours un autre fil qui la demande en même temps).
+\end{alertblock}
+
+\begin{block}{Solution possible dans notre cas}
+  race5.go
+\end{block}
+
+}
+
+\frame{
+\frametitle{Semaphores}
+
+\begin{exampleblock}{Exercice}
+En plus de sa lenteur, voyez-vous un problème avec l'implantation précédente ? (fichier race5.go) Par exemple, si les goroutines ne démarrent pas dans l'ordre de leurs ID, que se passe-t-il ?
+\end{exampleblock}
+
+\pause
+
+\begin{alertblock}{Semaphore}
+  \begin{itemize}
+    \item Une variable $K$ initialisée à 1
+    \item Une file de processus (FIFO)
+    \item Deux opérations~:
+    \begin{itemize}
+      \item P (réservation)
+      \begin{itemize}
+        \item $K = K - 1$
+        \item Si $K < 0$ le fil d'exécution appelant est mis en file d'attente
+        \item Si $K \geq 0$ le fil d'exécution appelant continue son exécution
+      \end{itemize}
+      \item V (libération)
+      \begin{itemize}
+        \item $K = K + 1$
+        \item si $K \leq 0$ le fil d'exécution en tête de file d'attente continue
+      \end{itemize}
+    \end{itemize}
+  \end{itemize}
+\end{alertblock}
+
+}
+
+\frame{
+\frametitle{Semaphores (suite)}
+
+\begin{block}{Remarques~: gestions de quantités de ressources disponibles}
+  \begin{itemize}
+    \item K peut être initialisé à plus que 1
+    \item P et V peuvent faire varier K de plus de 1
+  \end{itemize}
+\end{block}
+
+\begin{block}{En Go}
+  On dispose dans le paquet sync d'un type Mutex qui correspond (à peu de choses près) à un semaphore (pour des raisons pratiques, la gestion de la file d'attente est plus complexe).
+\end{block}
+
+\begin{block}{Implantation finale}
+  race6.go
+\end{block}
+
+}
+
+% deadlocks
+
+% livelocks
+
+% c'est au programmeur de faire attention, pas de solution magique pour ça
+
+% asyncsafe structures et fonctions (map.go)
+
+
+\end{document}
