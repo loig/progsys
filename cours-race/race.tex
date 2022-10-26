@@ -169,13 +169,56 @@ En plus de sa lenteur, voyez-vous un problème avec l'implantation précédente 
 
 }
 
-% deadlocks
+\frame{
+\frametitle{Attention !}
 
-% livelocks
+\vfill
 
-% c'est au programmeur de faire attention, pas de solution magique pour ça
+\begin{block}{Utiliser de telles synchronisations est source d'erreurs}
+\begin{itemize}
+\item Réutiliser une ressource après l'avoir libérée (voir err.go)
+\item Libérer une ressource sans l'avoir réservée (voir err1.go)
+\item Utiliser une ressource sans l'avoir réservée (voir err2.go)
+\item Garder une ressource trop longtemps (voir err3.go)
+\item Oublier de libérer une ressource (voir err4.go)
+\end{itemize}
+\end{block}
 
-% asyncsafe structures et fonctions (map.go)
+\vfill
+
+\begin{center}
+\alert{Et plus on a de ressources partagées plus c'est compliqué !}
+\end{center}
+
+\vfill
+
+}
+
+\frame{
+\frametitle{Deadlocks}
+
+\begin{alertblock}{Deadlock (interblocage)}
+On parle de deadlock lorsque tous les fils d'exécution sont bloqués en même temps~: le programme ne peut plus progresser et n'a aucun espoir de se débloquer.
+\end{alertblock}
+
+\begin{block}{Quand ?}
+En général il y a des risques de deadlocks quand plusieurs mécanismes de synchronisation sont mis en place en même temps~:
+\begin{itemize}
+\item plusieurs ressources partagées, chacune protégée par un verrou différent
+\item une ressource partagée et une lecture dans un canal
+\item une ressource partagée et une attente d'évènement
+\item etc
+\end{itemize}
+\end{block}
+
+}
+
+\frame{
+\frametitle{???}
+
+On regarde le fichier map.go, quel est le problème avec ce code ?
+
+}
 
 
 \end{document}
