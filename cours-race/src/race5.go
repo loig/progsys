@@ -13,11 +13,11 @@ func swap(x, y *int, ID int64) {
 	defer wg.Done()
 	for {
 		if turn.CompareAndSwap(ID, -1) { // demande d'accès et réservation
-			//log.Print(ID)
+			log.Print(ID)
 			// début section critique
 			*x, *y = *y, *x
 			// fin section critique
-			turn.Store(ID + 1) // libération pour le suivant
+			turn.Store((ID + 1) % 1000) // libération pour le suivant
 		}
 	}
 }

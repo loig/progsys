@@ -8,21 +8,21 @@ var wg sync.WaitGroup
 
 func routine1() {
 	mx.Lock()
+	defer mx.Unlock()
 	x--
 	my.Lock()
+	defer my.Unlock()
 	y = x
-	my.Unlock()
-	mx.Unlock()
 	wg.Done()
 }
 
 func routine2() {
 	my.Lock()
+	defer my.Unlock()
 	y++
 	mx.Lock()
+	defer mx.Unlock()
 	x = y
-	mx.Unlock()
-	my.Unlock()
 	wg.Done()
 }
 

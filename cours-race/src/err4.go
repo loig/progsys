@@ -20,9 +20,17 @@ func routine() {
 	wg.Done()
 }
 
+func autre() {
+	for {
+
+	}
+	wg.Done()
+}
+
 func main() {
-	wg.Add(2)
+	wg.Add(3)
 	go routine()
 	go routine()
+	go autre()
 	wg.Wait()
 }
