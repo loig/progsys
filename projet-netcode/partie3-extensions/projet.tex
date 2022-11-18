@@ -1,0 +1,46 @@
+\documentclass[a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage{fullpage}
+\usepackage{graphicx}
+\usepackage{url}
+
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+
+%\usepackage[fontsize=18pt]{scrextend}
+%\usepackage{setspace}
+%\onehalfspacing
+
+\usepackage{fancybox}
+\newcommand{\exercice}[1]{\vspace{0.3cm}\shadowbox{\begin{minipage}{15cm}#1\end{minipage}}\vspace{0.3cm}}
+
+\title{Réalisation du «net code» d'un jeu vidéo simple\\ Partie 3~: extensions}
+\author{Projet de programmation système (R3.05)\\ Année 2022-2023}
+\date{loig.jezequel@univ-nantes.fr}
+
+\begin{document}
+\maketitle{}
+
+Quand vous commencez ce TP vous avez normalement mis en place l'intégralité du jeu : les clients peuvent jouer une partie complète, en lien avec le serveur, et voir les résultats des autres. Il reste cependant quelques éléments qui peuvent paraître étranges : un client ne voit pas les couleurs choisies par les autres, il ne voit pas non plus les autres courir. Les extensions au projet proposées dans cet partie visent notamment à améliorer ceci.
+
+{\bf Vous devez réaliser le plus possible d'extensions. Vous êtes libres de les faire dans l'ordre que vous voulez, mais certaines sont dépendantes les unes des autres, réfléchissez donc bien avant de vous lancer.}
+
+\exercice{L'écran d'accueil pourrait afficher le nombre de joueurs connectés à tout instant.}
+
+\exercice{Lors de la sélection des personnages on pourrait voir les déplacements des autres joueurs pendant qu'ils font leur sélection.}
+
+\exercice{Lors de la sélection des personnages on pourrait s'assurer qu'il n'y a pas deux joueurs qui ont choisi la même couleur.}
+
+\exercice{Lors de la sélection des personnages on pourrait permettre à un joueur de changer son choix de personnage tant que tout le monde n'a pas choisi.}
+
+\exercice{Lors de la course, on pourrait modifier les comportements aléatoires des personnages pour qu'ils correspondent à peu près aux temps envoyés par les joueurs en fin de course.}
+
+\exercice{Lors de la course, on pourrait remplacer les comportements aléatoires des personnages par des comportements qui correspondent le plus possible à ce que fait chaque joueur.}
+
+\exercice{Les numéros des personnages pourraient être les mêmes pour tout le monde, c'est-à-dire qu'un joueur serait P1, un joueur P2, etc.}
+
+\exercice{Le serveur pourrait gérer chaque client dans une goroutine~: séparer la gestion de la logique du jeu de la gestion des communications réseau.}
+
+Une fois toutes ces extensions réalisées, les quatre joueurs devraient normalement voir quasiment la même chose sur leurs écrans à tout moment.
+
+\end{document}
