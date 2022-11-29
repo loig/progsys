@@ -12,3 +12,5 @@ tests/*
 *.tgz
 course
 td-ordo/correction/*
+test-machine/correction/*
+test-machine/sujet/*
