@@ -1,0 +1,59 @@
+\documentclass[a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage{fullpage}
+\usepackage{graphicx}
+\usepackage{url}
+
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+
+%\usepackage[fontsize=18pt]{scrextend}
+%\usepackage{setspace}
+%\onehalfspacing
+
+\usepackage{fancybox}
+\newcommand{\exercice}[1]{\vspace{0.3cm}\shadowbox{\begin{minipage}{15cm}#1\end{minipage}}\vspace{0.3cm}}
+
+\title{Réalisation du «net code» d'un jeu vidéo simple\\ Partie 2~: transmettre de l'information aux clients}
+\author{Projet de programmation système (R3.05)\\ Année 2023-2024}
+\date{loig.jezequel@univ-nantes.fr}
+
+\begin{document}
+\maketitle{}
+
+Quand vous commencez ce TP vous avez normalement mis en place un serveur capable de signaler aux clients quand ils sont deux à s'être connectés.
+
+\section{Un peu plus loin dans le jeu}
+
+C'est votre serveur qui va contrôler l'avancement du jeu pour les clients~: il leur permettra, à chaque phase du jeu (connexion, choix des couleurs, partie, résultats) de savoir quand l'autre sera prêt à passer à la suite.
+
+Cela se déroulera à peu près toujours de la même façon, que vous avez déjà mise en œuvre pour détecter la connexion des deux clients~: le serveur attend deux messages (un de chaque client) puis prévient les clients qu'ils peuvent passer à la phase suivante.
+
+\exercice{Étendez votre serveur pour prendre en compte la sélection des couleurs. Pour le moment on veut juste savoir quand tous les joueurs ont sélectionné leur couleur, on ne souhaite pas (encore) transmettre cette information à l'autre. Vous pourrez représenter les interactions entre clients et serveur par un schéma si cela vous aide.}
+
+\section{Transmettre des informations aux clients}
+
+Pour le moment, votre serveur n'est pas capable de transmettre d'informations précises aux clients, il ne fait que leur signaler quand ils peuvent changer de phase.
+
+Cependant, durant la partie, il faut que chaque client puisse récupérer l'endroit ou l'autre a joué son pion pour pouvoir l'afficher.
+
+\exercice{Représentez les échanges qui doivent avoir lieu entre clients et serveur pour que chaque joueur obtienne toutes les positions des pions joués par l'autre. Proposez un protocole, c'est-à-dire un format de messages, pour mettre cela en œuvre.}
+
+\exercice{Étendez votre serveur pour prendre en compte la partie. Chaque client doit afficher tous les coups joués par chacun des deux joueurs.}
+
+Vous remarquerez qu'il faut déterminer un premier joueur pour pouvoir jouer une partie.
+
+\section{La fin du jeu}
+
+Pour mettre en place tout le flot du jeu il ne reste plus qu'à prendre en compte la fin de partie et à permettre aux joueurs de se synchroniser pour redémarrer une partie une fois les résultats affichés.
+
+\exercice{Faites un schéma pour représenter les échanges entre clients et serveur tout au long du jeu, en incluant ces dernières synchronisation.}
+
+\exercice{Ajouter ces dernières synchronisations à votre jeu. N'oubliez pas de tester en affrontant vos camarades.}
+
+\section{Première amélioration}
+
+\exercice{Affichez à l'écran le nombre de joueurs connectés (en début de jeu) et le nombre de joueurs prêts à redémarrer (à la fin d'une course). Ces nombres doivent évoluer dynamiquement dès que le serveur obtient de nouvelles informations. Au besoin, représenter sur un schéma les interactions entre serveur et clients.}
+
+
+\end{document}

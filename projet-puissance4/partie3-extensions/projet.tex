@@ -1,0 +1,38 @@
+\documentclass[a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage{fullpage}
+\usepackage{graphicx}
+\usepackage{url}
+
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+
+%\usepackage[fontsize=18pt]{scrextend}
+%\usepackage{setspace}
+%\onehalfspacing
+
+\usepackage{fancybox}
+\newcommand{\exercice}[1]{\vspace{0.3cm}\shadowbox{\begin{minipage}{15cm}#1\end{minipage}}\vspace{0.3cm}}
+
+\title{Réalisation du «net code» d'un jeu vidéo simple\\ Partie 3~: extensions}
+\author{Projet de programmation système (R3.05)\\ Année 2023-2024}
+\date{loig.jezequel@univ-nantes.fr}
+
+\begin{document}
+\maketitle{}
+
+Quand vous commencez ce TP vous avez normalement mis en place l'intégralité du jeu : les clients peuvent jouer une partie complète, en lien avec le serveur, et voir les résultats, puis recommencer une partie. Les extensions au projet proposées dans cet partie visent notamment à améliorer le jeu.
+
+{\bf Vous devez réaliser le plus possible d'extensions. Vous êtes libres de les faire dans l'ordre que vous voulez, mais certaines sont dépendantes les unes des autres, réfléchissez donc bien avant de vous lancer.}
+
+Vous pouvez proposer d'autres extensions. Faites les valider par un enseignant avant de les réaliser.
+
+\exercice{Lors de la sélection des couleurs on pourrait voir les déplacements de l'autre joueur pendant qu'il fait sa sélection.}
+
+\exercice{Lors de la sélection des couleurs on pourrait s'assurer que les deux joueurs ne peuvent pas choisir la même couleur.}
+
+\exercice{Lors de la sélection des couleurs on pourrait permettre à un joueur de changer son choix de couleur tant que l'autre n'a pas choisi.}
+
+\exercice{Le serveur pourrait gérer chaque client dans une goroutine~: séparer la gestion de la logique du jeu de la gestion des communications réseau.}
+
+\end{document}
