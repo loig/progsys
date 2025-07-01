@@ -1,6 +1,8 @@
 # R3.05 Programmation système
 
-Sources des documents du cours de programmation système
+Sources des documents du cours de programmation système (R3.05) à l'IUT de Nantes (2022-2025).
+
+Dépôt d'origine : [https://gitlab.univ-nantes.fr/jezequel-l/progsys]
 
 ## Contenu du dépôt
 
