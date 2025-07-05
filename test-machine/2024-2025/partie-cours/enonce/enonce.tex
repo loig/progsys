@@ -1,0 +1,153 @@
+\documentclass[a4paper]{article}
+
+\usepackage{fullpage}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage[hyperfootnotes=false]{hyperref}
+
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+
+%\usepackage[fontsize=18pt]{scrextend}
+%\usepackage{setspace}
+%\onehalfspacing
+
+%sections
+\usepackage{titlesec}
+\titleformat{\section}{\normalfont\Large\bfseries}{\setcounter{numex}{0}Exercice~\arabic{section}.}{1em}{}
+
+%boxes
+\newcounter{numex}
+\usepackage{fancybox}
+\newcommand{\exercice}[1]{\stepcounter{numex}\vspace{0.3cm}\shadowbox{\begin{minipage}{14.5cm}{\bf Question \arabic{section}.\arabic{numex}.} #1\end{minipage}}\vspace{0.3cm}}
+\newcommand{\important}[1]{\vspace{0.3cm}\doublebox{\begin{minipage}{14.5cm}#1\end{minipage}}\vspace{0.3cm}}
+
+%code
+\usepackage{listings}
+\usepackage{color}
+\usepackage{newfloat}
+\usepackage{caption}
+\DeclareFloatingEnvironment[fileext=frm,placement={htbp},name=Programme]{figprog}
+%\captionsetup[figprog]{labelfont=bf}
+%% Golang definition for listings
+%% http://github.io/julienc91/lstlistings-golang
+\lstdefinelanguage{Golang}{
+  morekeywords=[1]{package,import,func,type,struct,return,defer,panic,recover,select,var,const,iota,},
+   morekeywords=[2]{string,uint,uint8,uint16,uint32,uint64,int,int8,int16,int32,int64,bool,float32,float64,complex64,complex128,byte,rune,uintptr, error,interface},
+   morekeywords=[3]{map,slice,make,new,nil,len,cap,copy,close,true,false,delete,append,real,imag,complex,chan,},
+   morekeywords=[4]{for,break,continue,range,go,goto,switch,case,fallthrough,if,
+     else,default,},
+   morekeywords=[5]{Println,Printf,Error,Print,Fatal,ReadFile,Open,NewScanner,Scan,Text,Err,Create,Close},
+   sensitive=true,
+   morecomment=[l]{//},
+   morecomment=[s]{/*}{*/},
+   morestring=[b]',
+   morestring=[b]",
+   morestring=[s]{`}{`}
+   }
+\lstset{
+    extendedchars=\true,
+    inputencoding=utf8,
+    literate=%
+            {é}{{\'{e}}}1
+            {è}{{\`{e}}}1
+            {ê}{{\^{e}}}1
+            {ë}{{\¨{e}}}1
+            {û}{{\^{u}}}1
+            {ù}{{\`{u}}}1
+            {â}{{\^{a}}}1
+            {à}{{\`{a}}}1
+            {î}{{\^{i}}}1
+            {ô}{{\^{o}}}1
+            {ç}{{\c{c}}}1
+            {Ç}{{\c{C}}}1
+            {É}{{\'{E}}}1
+            {Ê}{{\^{E}}}1
+            {À}{{\`{A}}}1
+            {Â}{{\^{A}}}1
+            {Î}{{\^{I}}}1,
+    frame=none,
+    xleftmargin=1cm,
+    basicstyle=\footnotesize,
+    keywordstyle=\bf\color{blue},
+    numbers=none,
+    numbersep=5pt,
+    showstringspaces=false,
+    stringstyle=\color{red},
+    tabsize=4,
+    language=Golang % this is it !
+}
+\newcommand{\sourcecode}[3]{\begin{figprog}\begin{center}\begin{minipage}{10cm}\par\noindent\rule{\textwidth}{0.4pt}\lstinputlisting{src/#1}\par\noindent\rule{\textwidth}{0.4pt}\end{minipage}\end{center}\caption{#1}\label{#3}\end{figprog}}
+\newcommand{\bigsourcecode}[3]{\begin{figprog}\begin{center}\begin{minipage}{16cm}\par\noindent\rule{\textwidth}{0.4pt}\lstinputlisting{src/#1}\par\noindent\rule{\textwidth}{0.4pt}\end{minipage}\end{center}\caption{#1}\label{#3}\end{figprog}}
+
+% macros générales
+\newcommand{\file}[1]{\textsf{#1}}
+\newcommand{\madoc}{\textsc{Madoc}}
+\newcommand{\term}[1]{\textsf{#1}}
+\newcommand{\inlinecode}[1]{\textsf{#1}}
+\newcommand{\goout}[1]{\textsf{#1}} % retours de go, erreurs, etc
+
+\title{Test machine 2024/2025}
+\author{Programmation système}
+\date{BUT informatique, deuxième année}
+
+\begin{document}
+
+\maketitle{}
+
+{\bf Vous disposez de 1h} pour faire ce test. À la fin du temps, vous devrez {\bf déposer une archive dans l'espace de rendu à votre nom} (situé dans le dossier \file{Étudiants} du devoir).
+Cette archive doit contenir~:
+\begin{itemize}
+\item tous les fichiers à rendre (code Go), et
+\item un fichier pdf avec vos réponses aux questions qui ne demandent pas de coder
+\end{itemize}.
+
+Les deux exercices sont indépendants.
+Chacun rapportera la moitié des points (10/20).
+Il est conseillé de faire les questions de chaque exercice dans l'ordre, elles sont faites pour vous guider.
+
+\important{Dans tout ce test, avoir une \emph{race-condition} ou un \emph{deadlock} dans votre code entraînera la perte de tous les points de la question.}
+
+\important{À toute fin utile, on rappelle qu'il est possible d'obtenir la documentation sur un paquet XXX en utilisant la commande suivante dans un terminal~: \inlinecode{go doc XXX} et la documentation sur la fonction YYY de ce paquet en utilisant la commande~: \inlinecode{go doc XXX.YYY}}
+
+
+\section{Producteur/consommateur}
+
+Le dossier \file{ex1} fourni avec cet énoncé contient du code source Go.
+Un fichier \file{main.go} contient le code de la fonction \inlinecode{main}, qui se charge de démarrer deux goroutines~: \inlinecode{producer} et \inlinecode{consumer}.
+Un fichier \file{prod.go} contient le code de la fonction \inlinecode{producer} et un fichier \file{cons.go} contient un prototype de la fonction \inlinecode{consumer}.
+
+\exercice{Expliquer l'intérêt de lancer la fonction \inlinecode{producer} sans utiliser le mot clé \inlinecode{go}.}
+
+\exercice{Expliquer en quelques mots ce que fait la fonction \inlinecode{producer}.}
+
+\exercice{Coder la fonction \inlinecode{consumer} pour faire en sorte qu'elle affiche dans le terminal tout ce que la fonction \inlinecode{producer} écrit dans son canal. Vous rendrez ce code sous le nom \file{consv1.go}.}
+
+\exercice{Coder la fonction \inlinecode{consumer} pour faire en sorte qu'elle affiche dans le terminal tout ce que la fonction \inlinecode{producer} écrit dans son canal mais en étant régulière : un nombre par seconde. Si jamais, au moment où un affichage doit avoir lieu, le canal ne contient rien, vous afficherez \emph{trop tard} à la place. Vous pourrez utiliser pour cela la fonction \inlinecode{time.After()} du packet \inlinecode{time}. Vous rendrez ce code sous le nom \file{consv2.go}.}
+
+\exercice{Coder la fonction \inlinecode{consumer} pour faire en sorte qu'elle affiche dans le terminal uniquement les nombres impairs que la fonction \inlinecode{producer} écrit dans son canal et en étant régulière : un nombre impair par seconde. Si jamais, au moment où un affichage doit avoir lieu, le canal ne contient aucun nombre impair, vous afficherez \emph{trop tard} à la place. Vous pourrez utiliser pour cela la fonction \inlinecode{time.After()} du packet \inlinecode{time}. Vous rendrez ce code sous le nom \file{consv3.go}.}
+
+\section{Ordonnancement}
+
+Le dossier \file{ex2} fourni avec cet énoncé contient du code source Go.
+Un fichier \file{main.go} contient le code de la fonction \inlinecode{main}, qui se charge de démarrer deux goroutines~: \inlinecode{generator} et \inlinecode{scheduler}.
+Un fichier \file{gen.go} contient le code de la fonction \inlinecode{generator} et un fichier \file{sched.go} contient un prototype de la fonction \inlinecode{scheduler}.
+
+%\exercice{Expliquer l'intérêt de lancer la fonction \inlinecode{generator} sans utiliser le mot clé \inlinecode{go}.}
+
+%\exercice{Coder la fonction \inlinecode{scheduler} pour faire en sorte qu'elle affiche dans le terminal tout ce qu'elle reçoit dans son canal. Vous rendrez ce code sous le nom \file{schedv1.go}.}
+
+\exercice{Expliquer en quelques mots ce que fait la fonction \inlinecode{generator}.}
+
+\exercice{Rappeler le principe de l'ordonnancement fcfs (\emph{first come first served}).}
+
+\exercice{Donner un histogramme représentant les tâches qui s'exécutent à chaque instant lorsqu'un applique un ordonnancement fcfs aux tâches fournies par la fonction \inlinecode{generator}.}
+
+\important{Pour les deux questions suivantes il faut que vos programmes fonctionnent même si la liste de tâches est modifiée.}
+
+\exercice{Coder la fonction \inlinecode{scheduler} pour faire en sorte qu'elle affiche dans le terminal à chaque pas de temps (chaque message reçu de \inlinecode{generator}) la tâche qui devrait s'exécuter avec un ordonnacement fcfs. Vous rendrez ce code sous le nom \file{schedv1.go}.}
+
+\exercice{Coder la fonction \inlinecode{scheduler} pour faire en sorte qu'elle affiche dans le terminal à chaque pas de temps (chaque message reçu de \inlinecode{generator}) la tâche qui devrait s'exécuter avec un ordonnacement srt (\emph{shortest remaining time}). Vous rendrez ce code sous le nom \file{schedv2.go}.}
+
+
+\end{document}

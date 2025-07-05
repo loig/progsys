@@ -1,0 +1,160 @@
+\documentclass[a4paper]{article}
+
+\usepackage{fullpage}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage[hyperfootnotes=false]{hyperref}
+
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+
+%\usepackage[fontsize=18pt]{scrextend}
+%\usepackage{setspace}
+%\onehalfspacing
+
+%sections
+\usepackage{titlesec}
+\titleformat{\section}{\normalfont\Large\bfseries}{\setcounter{numex}{0}Exercice~\arabic{section}.}{1em}{}
+
+%boxes
+\newcounter{numex}
+\usepackage{fancybox}
+\newcommand{\exercice}[1]{\stepcounter{numex}\vspace{0.3cm}\shadowbox{\begin{minipage}{14.5cm}{\bf Question \arabic{section}.\arabic{numex}.} #1\end{minipage}}\vspace{0.3cm}}
+\newcommand{\important}[1]{\vspace{0.3cm}\doublebox{\begin{minipage}{14.5cm}#1\end{minipage}}\vspace{0.3cm}}
+
+%code
+\usepackage{listings}
+\usepackage{color}
+\usepackage{newfloat}
+\usepackage{caption}
+\DeclareFloatingEnvironment[fileext=frm,placement={htbp},name=Programme]{figprog}
+%\captionsetup[figprog]{labelfont=bf}
+%% Golang definition for listings
+%% http://github.io/julienc91/lstlistings-golang
+\lstdefinelanguage{Golang}{
+  morekeywords=[1]{package,import,func,type,struct,return,defer,panic,recover,select,var,const,iota,},
+   morekeywords=[2]{string,uint,uint8,uint16,uint32,uint64,int,int8,int16,int32,int64,bool,float32,float64,complex64,complex128,byte,rune,uintptr, error,interface},
+   morekeywords=[3]{map,slice,make,new,nil,len,cap,copy,close,true,false,delete,append,real,imag,complex,chan,},
+   morekeywords=[4]{for,break,continue,range,go,goto,switch,case,fallthrough,if,
+     else,default,},
+   morekeywords=[5]{Println,Printf,Error,Print,Fatal,ReadFile,Open,NewScanner,Scan,Text,Err,Create,Close},
+   sensitive=true,
+   morecomment=[l]{//},
+   morecomment=[s]{/*}{*/},
+   morestring=[b]',
+   morestring=[b]",
+   morestring=[s]{`}{`}
+   }
+\lstset{
+    extendedchars=\true,
+    inputencoding=utf8,
+    literate=%
+            {é}{{\'{e}}}1
+            {è}{{\`{e}}}1
+            {ê}{{\^{e}}}1
+            {ë}{{\¨{e}}}1
+            {û}{{\^{u}}}1
+            {ù}{{\`{u}}}1
+            {â}{{\^{a}}}1
+            {à}{{\`{a}}}1
+            {î}{{\^{i}}}1
+            {ô}{{\^{o}}}1
+            {ç}{{\c{c}}}1
+            {Ç}{{\c{C}}}1
+            {É}{{\'{E}}}1
+            {Ê}{{\^{E}}}1
+            {À}{{\`{A}}}1
+            {Â}{{\^{A}}}1
+            {Î}{{\^{I}}}1,
+    frame=none,
+    xleftmargin=1cm,
+    basicstyle=\footnotesize,
+    keywordstyle=\bf\color{blue},
+    numbers=none,
+    numbersep=5pt,
+    showstringspaces=false,
+    stringstyle=\color{red},
+    tabsize=4,
+    language=Golang % this is it !
+}
+\newcommand{\sourcecode}[3]{\begin{figprog}\begin{center}\begin{minipage}{10cm}\par\noindent\rule{\textwidth}{0.4pt}\lstinputlisting{src/#1}\par\noindent\rule{\textwidth}{0.4pt}\end{minipage}\end{center}\caption{#1}\label{#3}\end{figprog}}
+\newcommand{\bigsourcecode}[3]{\begin{figprog}\begin{center}\begin{minipage}{16cm}\par\noindent\rule{\textwidth}{0.4pt}\lstinputlisting{src/#1}\par\noindent\rule{\textwidth}{0.4pt}\end{minipage}\end{center}\caption{#1}\label{#3}\end{figprog}}
+
+% macros générales
+\newcommand{\file}[1]{\textsf{#1}}
+\newcommand{\madoc}{\textsc{Madoc}}
+\newcommand{\term}[1]{\textsf{#1}}
+\newcommand{\inlinecode}[1]{\textsf{#1}}
+\newcommand{\goout}[1]{\textsf{#1}} % retours de go, erreurs, etc
+
+\title{Évaluation du projet 2024/2025}
+\author{Programmation système}
+\date{BUT informatique, deuxième année}
+
+\begin{document}
+
+\maketitle{}
+
+{\bf Vous disposez de 1h} pour faire ce test. À la fin du temps, vous devrez {\bf déposer une archive dans l'espace de rendu à votre nom} (situé dans le dossier \file{Étudiants} du devoir).
+Cette archive doit contenir~:
+\begin{itemize}
+\item tous les fichiers à rendre (code Go), et
+\item un fichier pdf avec vos réponses aux questions qui ne demandent pas de coder
+\end{itemize}.
+
+Il est conseillé de faire les questions dans l'ordre, elles sont faites pour vous guider.
+
+\important{Dans tout ce test, avoir une \emph{race-condition} ou un \emph{deadlock} dans votre code entraînera la perte de tous les points de la question.}
+
+\important{À toute fin utile, on rappelle qu'il est possible d'obtenir la documentation sur un paquet XXX en utilisant la commande suivante dans un terminal~: \inlinecode{go doc XXX} et la documentation sur la fonction YYY de ce paquet en utilisant la commande~: \inlinecode{go doc XXX.YYY}}
+
+Le dossier \file{projet} fourni avec cet énoncé contient du code source Go~: dans un dossier \file{client} vous trouverez le code d'un jeu basique (deviner un nombre entre 0 et 99 en proposant des valeurs les unes après les autres jusqu'à trouver le bon nombre) et dans le dossier \file{serveur} vous trouverez le code d'un serveur très rudimentaire.
+
+\vfill
+
+\section{Serveur}
+
+Dans cette partie on s'intéresse au code du serveur situé dans le dossier \file{serveur} (donc, on ne s'intéresse pas au code situé dans le dossier \file{client}, il n'est pas nécessaire d'avoir regardé ce code pour faire cette partie).
+
+\exercice{Sur quel port le serveur codé dans \file{serveur/main.go} écoute-t-il ?}
+
+\exercice{Expliquer le principe général du modèle client/serveur en quelques mots (et éventuellement en vous appuyant sur un schéma).}
+
+\exercice{Représenter graphiquement une séquence de messages qui pourraient être échangés entre un client et le serveur pour faire afficher le message \emph{C'est fini, bravo !} au serveur (ligne 85 dans \file{serveur/main.go}) dans le cas où answer vaut 73. Faites en sorte qu'au cours de cette séquence le serveur envoie au moins une fois chaque message différent qu'il peut envoyer.}
+
+\newpage{}
+
+\section{Client}
+
+On s'intéresse maintenent au code du client, situé dans le dossier \file{client}.
+
+Le dossier \file{client} contient deux fichiers de code source go~\file{main.go} et \file{pastouche.go}.
+Comme son nom l'indique, il ne faut pas modifier le deuxième fichier (et, normalement, vous n'avez même pas besoin de l'ouvrir).
+
+Ces deux fichiers sont le code d'un jeu très simple où il faut deviner un nombre entre 0 et 99 en faisant des essais successifs.
+À chaque proposition de nombre une réponse indique si la proposition était un nombre trop grand, trop petit ou le bon nombre.
+
+Le code du jeu repose sur les mêmes principes que le code de votre projet.
+On n'ira pas tout modifier dans ce devoir mais on s'intéressera uniquement à trois fonctions~: \file{main}, \file{sendGuess} et \file{checkGuess}.
+De plus, on devra manipuler le champs state de la structure game (que vous n'avez pas besoin d'aller regarder) pour lui donner l'une des trois valeurs possibles~: \file{stateGuess} (quand le joueur doit proposer un nombre), \file{stateRes} quand on est en train de comparer le nombre proposé avec le nombre à deviner et \file{stateWon} quand le joueur a trouvé le nombre à deviner.
+
+\important{Attention, dans le jeu que vous rendez il ne faut jamais que la petite animation en bas à droite de la fenêtre puisse s'arrête de tourner, c'est-à-dire que les communications avec le réseau ne doivent jamais ralentir le jeu. Pour cela, vous mettrez en œuvre les stratégies vues en projet pour envoyer et recevoir des messages.}
+
+\important{Si vous souhaitez avoir des variables partagées entre plusieurs fonctions utilisez des variables globales, ne modifiez pas le fichier \file{pastouche.go} (même si c'est vrai que c'est plus propre d'ajouter des champs à la structure game).}
+
+\exercice{Modifier la fonction \file{main} pour établir une connexion avec le serveur.}
+
+Quand on est dans l'état \file{stateGuess} on peut utiliser les boutons du jeu pour rentrer un nombre.
+Au moment où on appuie sur le bouton \file{Proposer} la fonction \file{sendGuess} est appelée.
+
+\exercice{Àjoutez dans la fonction \file{sendGuess} l'envoie d'un message (dont vous déterminerez le contenu à partir de vos réponses à l'exercice précédent) au serveur quand la fonction est appelée.}
+
+Quand on est dans l'état \file{stateRes} la fonction \file{checkGuess} est appelée à chaque mise-à-jour du jeu (donc 60 fois par seconde).
+
+\exercice{Modifier la fonction \file{checkGuess}  pour recevoir un message du serveur et utiliser son contenu pour déterminer si la dernière proposition faite était bonne, trop petite ou trop grande (après ça {\bf la variable answer ne sert donc plus à rien, vous pouvez la supprimer}).}
+
+Quand on est dans l'état \file{stateWon} le jeu est terminé et plus rien ne se passe.
+
+\exercice{Faites les dernières modifications à votre code pour que le serveur arrive à la fin de son exécution (affiche \emph{C'est fini, bravo !}) quand le joueur a trouvé le bon nombre.}
+
+\end{document}
